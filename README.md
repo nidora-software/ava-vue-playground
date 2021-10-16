@@ -1,4 +1,4 @@
-# ava-test-vue
+# ava-vue-playground
 
 ## Project setup
 ```
