@@ -60,7 +60,7 @@ function isConnected() {
 }
 
 function walletAddress(mask = true) {
-    let account = selectedAccount;
+    const account = selectedAccount;
     if(account) {
         return mask ? account.substring(0, 6) + "..." + account.substring(account.length-4, account.length) : account;
     }
@@ -68,7 +68,7 @@ function walletAddress(mask = true) {
 
 async function balance() {
     if(selectedAccount) {
-        let balance = await provider.getBalance(selectedAccount);
+        const balance = await provider.getBalance(selectedAccount);
         return ethers.utils.formatEther(balance);
     }
     return 0;
@@ -99,14 +99,14 @@ async function disconnect() {
 }
 
 function displayAccount(account) {
-    let accountAddress = walletAddress(false);
+    const accountAddress = walletAddress(false);
     console.log("Current account is " + accountAddress);
     displayBalance(account);
 }
 
 async function displayBalance(account) {
-    let balance = await provider.getBalance(account)
-    let friendlyBalance = ethers.utils.formatEther(balance)
+    const balance = await provider.getBalance(account)
+    const friendlyBalance = ethers.utils.formatEther(balance)
     console.log("Balance is " + friendlyBalance)
 }
 

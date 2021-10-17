@@ -11,13 +11,13 @@ const { signer } = require("./wallet.js");
 
 const provider = new ethers.providers.JsonRpcProvider(AVALANCHE_TESTNET_PARAMS.rpcUrls[0]);
 
+const contract = new ethers.Contract(contractAddress, contractAbi, signer());
+
 let name;
 let symbol;
 let decimals;
 let totalSupply;
 let balance;
-
-const contract = new ethers.Contract(contractAddress, contractAbi, signer());
 
 async function initialize() {
     if(contract) {
@@ -27,6 +27,7 @@ async function initialize() {
         await queryDecimals();
         await queryTotalSupply();
         await queryBalance();
+        hookMintEvents();
     } else {
         console.log("Contract could not be initialized");
     }
@@ -49,20 +50,18 @@ async function queryDecimals() {
 
 async function queryTotalSupply() {
     totalSupply = await contract.totalSupply()
-    let decimalCount = decimals ?? 18;
-    totalSupply = totalSupply.toString()
-    totalSupply = totalSupply.slice(0, totalSupply.length - decimalCount);
+    totalSupply = ethers.utils.formatUnits(totalSupply, decimals ?? 18)
     console.log("Contract total supply is " + totalSupply);
 }
 
 async function queryBalance() {
-    let address = await signer().getAddress();
+    const address = await signer().getAddress();
     balance = await getBalance(address);
     console.log("Current balance is " + balance);
 }
 
 async function getBalance(address) {
-    let balance = await contract.balanceOf(address);
+    const balance = await contract.balanceOf(address);
     return ethers.utils.formatUnits(balance, 18);
 }
 
@@ -75,10 +74,10 @@ async function burn() {
 
     const amount = ethers.utils.parseUnits("1.0", decimals ?? 18);
 
-    contract.burn(address, amount, overrides).then(value => {
-        console.log("Transaction completed with value " + value);
-    }, reason => {
-        console.log("Transaction rejected with reason " + reason);
+    contract.burn(address, amount, overrides).then(() => {
+        console.log("[BURN]: Transaction submitted");
+    }, () => {
+        console.log("[BURN]: Transaction rejected");
     });
 
 }
@@ -92,10 +91,10 @@ async function mint() {
 
     const amount = ethers.utils.parseUnits("1.0", decimals ?? 18);
 
-    contract.mint(address, amount, overrides).then(value => {
-        console.log("Transaction completed with value " + value);
-    }, reason => {
-        console.log("Transaction rejected with reason " + reason);
+    contract.mint(address, amount, overrides).then(() => {
+        console.log("[MINT]: Transaction submitted");
+    }, () => {
+        console.log("[MINT]: Transaction rejected");
     });
 
 }
@@ -121,4 +120,13 @@ async function contractInteractionOverrides() {
         gasPrice: gasPrice
     };
 
+}
+
+async function hookMintEvents() {
+    const address = await signer().getAddress();
+    const filterTo = contract.filters.Transfer(null, address);
+    contract.on(filterTo, (from, to, amount) => {
+        // The `to` will always be the signer address
+        console.log("[MINT]: Transaction completed, " + from + " => " + to + ", amount " + ethers.utils.formatUnits(amount, decimals ?? 18));
+    });
 }
