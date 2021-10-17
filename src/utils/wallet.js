@@ -1,4 +1,4 @@
-export { initialize, block, isConnected, walletAddress, balance, connect, disconnect, faucet }
+export { initialize, block, isConnected, walletAddress, balance, connect, disconnect, faucet, signer }
 
 const { ethereum } = window;
 
@@ -122,3 +122,7 @@ const isMetaMaskInstalled = () => {
     //Have to check the ethereum binding on the window object to see if it's installed
     return Boolean(ethereum && ethereum.isMetaMask);
 };
+
+const signer = () => {
+    return provider.getSigner();
+}

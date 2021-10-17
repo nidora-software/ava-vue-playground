@@ -2,16 +2,14 @@
   <div class="hello">
     <h1>{{ msg }}</h1>
     <p>
-      For further information about this project,<br>
-      contact with
-      <a href="https://github.com/erencelik" target="_blank" rel="noopener">author</a>.
+      For further information about this project, contact with <a href="https://github.com/erencelik" target="_blank" rel="noopener">author</a>.
     </p>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'Hello',
   props: {
     msg: String
   }

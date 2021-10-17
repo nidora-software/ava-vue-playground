@@ -2,9 +2,12 @@
   <div class="contract">
     <h1>Contract Plugin</h1>
     <div v-if="contractAddress">
-      <label> {{ contractAddress }} </label>
-      <label> {{ contractName }} </label>
+      <button>{{ contractAddress }}</button>
+      <label>Contract name is {{ contractName }}</label>
+      <label>Decimal count is {{ contractDecimals }}</label>
+      <label>Total supply is {{ contractTotalSupply }} {{ contractSymbol }}</label>
       <button v-on:click="queryBalance">Query Balance</button>
+      <button v-on:click="burn">Burn</button>
       <button v-on:click="mint">Mint</button>
       <div v-if="contractBalance">
         <label>Balance is {{ contractBalance }} {{ contractSymbol }}</label>
@@ -22,6 +25,8 @@ export default {
       contractAddress: undefined,
       contractName: undefined,
       contractSymbol: undefined,
+      contractDecimals: undefined,
+      contractTotalSupply: undefined,
       contractBalance: undefined
     };
   },
@@ -31,17 +36,22 @@ export default {
         this.reload();
       },
       queryBalance: async function() {
-        await contract.displayBalance();
+        await contract.queryBalance();
         this.reload();
       },
+      burn: function() {
+        contract.burn();
+      },
       mint: async function() {
-        console.log("Mint success");
+        contract.mint();
       },
       reload: async function() {
         this.contractAddress = await contract.contractAddress;
-        this.contractName = await contract.name();
-        this.contractSymbol = await contract.symbol();
-        this.contractBalance = await contract.balance();
+        this.contractName = await contract.name;
+        this.contractSymbol = await contract.symbol;
+        this.contractDecimals = await contract.decimals;
+        this.contractTotalSupply = await contract.totalSupply;
+        this.contractBalance = await contract.balance;
       }
   },
   async created() {

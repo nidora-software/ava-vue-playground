@@ -50,7 +50,7 @@ export default {
       reload: async function() {
         this.block = await wallet.block();
         this.isConnected = await wallet.isConnected();
-        this.walletAddress = await wallet.walletAddress();
+        this.walletAddress = await wallet.walletAddress(false);
         this.balance = await wallet.balance();
       }
   },
