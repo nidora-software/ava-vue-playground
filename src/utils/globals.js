@@ -37,7 +37,7 @@ async function copy(text) {
     }
 }
 
-function showNotification(title, message, dismissAfter = 20000) {
+function showNotification(title, message, dismissAfter = 4000) {
     notify({
         group: "top",
         title: title,
