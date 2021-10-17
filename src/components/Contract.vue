@@ -1,21 +1,21 @@
 <template>
   <div class="contract" v-if="isContractInitialized">
-    <span class="plugin-title">Contract Plugin</span>
-    <label>{{ contractName }} ({{ contractSymbol }})</label>
-    <button v-on:click="copy">{{ contractAddress }}</button>
-    <br><br>
-    <label v-if="contractDecimals">Decimal count is {{ contractDecimals }}</label>
-    <label v-if="contractTotalSupply">Total supply is {{ contractTotalSupply }} {{ contractSymbol }}</label>
-    <button v-on:click="queryBalance">Query Balance</button>
-    <button v-on:click="burn">Burn</button>
-    <button v-on:click="mint">Mint</button>
+    <label class="plugin-title">Contract Plugin</label>
+    <label class="plugin-label" >{{ contractName }} ({{ contractSymbol }})</label>
+    <button class="rounded-button" v-on:click="copy">{{ contractAddress }}</button>
+    <label class="plugin-label" v-if="contractDecimals">Decimal count is {{ contractDecimals }}</label>
+    <label class="plugin-label" v-if="contractCurrentItemCount && contractMaxItemCount">{{ contractCurrentItemCount }} / {{ contractMaxItemCount }} NFT's minted</label>
+    <button class="rounded-button" v-on:click="queryBalance">QUERY BALANCE</button>
+    <!-- <button class="rounded-button" v-on:click="burn">BURN</button> -->
+    <button class="rounded-button" v-on:click="mint">MINT</button>
     <div v-if="contractBalance">
-      <label>Balance is {{ contractBalance }} {{ contractSymbol }}</label>
+      <label class="plugin-label">Balance is {{ contractBalance }} {{ contractSymbol }}</label>
     </div>
   </div>
 </template>
 
 <script>
+import { inject } from 'vue'
 import * as contract from '../utils/contract.js'
 import { copy } from '../utils/globals.js'
 export default {
@@ -27,7 +27,8 @@ export default {
       contractName: undefined,
       contractSymbol: undefined,
       contractDecimals: undefined,
-      contractTotalSupply: undefined,
+      contractCurrentItemCount: undefined,
+      contractMaxItemCount: undefined,
       contractBalance: undefined
     };
   },
@@ -37,7 +38,6 @@ export default {
         this.reload();
       },
       queryBalance: async function() {
-        await contract.queryTotalSupply();
         await contract.queryBalance();
         this.reload();
       },
@@ -58,50 +58,17 @@ export default {
         this.contractName = await contract.name;
         this.contractSymbol = await contract.symbol;
         this.contractDecimals = await contract.decimals;
-        this.contractTotalSupply = await contract.totalSupply;
+        this.contractCurrentItemCount = await contract.currentItemCount;
+        this.contractMaxItemCount = await contract.maxItemCount;
         this.contractBalance = await contract.balance;
       }
   },
   async created() {
+    const emitter = inject("emitter");
     await this.initialize();
+    emitter.on("onUpdateContractStats", () => {
+      this.reload();
+    });
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-button {
-  display: inline-block;
-  height: 64px;
-  line-height: 64px;
-  padding: 0 32px 0 32px;
-  margin-inline: 8px;
-  border: 0px solid transparent;
-  border-radius: 32px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.25em;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: #fff;
-  -webkit-transition: .7s cubic-bezier(.17,.85,.438,.99);
-  -o-transition: .7s cubic-bezier(.17,.85,.438,.99);
-  transition: .7s cubic-bezier(.17,.85,.438,.99);
-  background: var(--main-color);
-}
-
-button:hover {
-  opacity: 0.5;
-  cursor: pointer;
-}
-
-label {
-  font-family: 'Montserrat', sans-serif;
-  display: block;
-  color: white;
-  margin: 32px auto;
-  font-size: 1.25em;
-  font-weight: 600;
-}
-
-</style>

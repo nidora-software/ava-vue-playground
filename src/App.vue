@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import { inject } from 'vue'
 import Notifications from "./components/Notifications.vue"
 import Hello from "./components/Hello.vue";
 import Wallet from "./components/Wallet.vue";
@@ -27,6 +28,10 @@ export default {
     Hello,
     Wallet,
     Contract
+  },
+  created: function() {
+    const emitter = inject("emitter");
+    emitter.all.clear();
   }
 };
 </script>
@@ -73,10 +78,51 @@ body {
 
 .plugin-title {
   display: block;
-  font-size: 36px;
-  font-weight: 800;
+  font-size: 32px;
+  font-weight: 600;
   margin-top: 16px;
   margin-bottom: 32px;
+}
+
+.plugin-label {
+  font-family: 'Montserrat', sans-serif;
+  display: block;
+  color: white;
+  margin: 32px auto;
+  font-size: 1.25em;
+  font-weight: 600;
+}
+
+.rounded-button {
+  display: inline-block;
+  height: 64px;
+  line-height: 64px;
+  padding: 0 32px 0 32px;
+  margin-inline: 8px;
+  border: 0px solid transparent;
+  border-radius: 32px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.2em;
+  font-weight: 600;
+  color: #fff;
+  -webkit-transition: .7s cubic-bezier(.17,.85,.438,.99);
+  -o-transition: .7s cubic-bezier(.17,.85,.438,.99);
+  transition: .7s cubic-bezier(.17,.85,.438,.99);
+  background: var(--main-color);
+}
+
+.rounded-button:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.hello>p {
+  font-size: 1.25em;
+}
+
+.hello>p>a {
+  color: #42b983;
+  text-decoration: underline;
 }
 
 </style>

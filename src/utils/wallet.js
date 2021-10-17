@@ -1,4 +1,15 @@
-export { initialize, block, isConnected, walletAddress, balance, connect, disconnect, faucet, signer }
+export { 
+    initialize, 
+    block, 
+    isConnected, 
+    walletAddress, 
+    balance, 
+    connect, 
+    disconnect, 
+    faucet, 
+    signer,
+    queryBalance
+};
 
 const { ethereum } = window;
 
@@ -10,6 +21,7 @@ let provider;
 
 let blockNumber;
 let selectedAccount;
+let balance;
 
 async function initialize() {
 
@@ -69,12 +81,13 @@ function walletAddress(mask = true) {
     }
 }
 
-async function balance() {
+async function queryBalance() {
     if(selectedAccount) {
-        const balance = await provider.getBalance(selectedAccount);
-        return ethers.utils.formatEther(balance);
+        const accountBalance = await provider.getBalance(selectedAccount);
+        balance = ethers.utils.formatEther(accountBalance);
+        console.log("Balance is " + balance)
     }
-    return 0;
+    return balance;
 }
 
 async function connect() {
@@ -95,8 +108,9 @@ async function connect() {
 
     if(accounts) {
         selectedAccount = accounts[0];
-        displayAccount(accounts[0]);
         console.log("Wallet connected");
+        console.log("Current account is " + selectedAccount);
+        await queryBalance();
     }
 
 }
@@ -104,18 +118,6 @@ async function connect() {
 async function disconnect() {
     selectedAccount = undefined;
     console.log("Wallet disconnected");
-}
-
-function displayAccount(account) {
-    const accountAddress = walletAddress(false);
-    console.log("Current account is " + accountAddress);
-    displayBalance(account);
-}
-
-async function displayBalance(account) {
-    const balance = await provider.getBalance(account)
-    const friendlyBalance = ethers.utils.formatEther(balance)
-    console.log("Balance is " + friendlyBalance)
 }
 
 async function faucet() {

@@ -1,5 +1,23 @@
 
-export { contractAddress, initialize, isContractInitialized, name, symbol, decimals, totalSupply, balance, queryTotalSupply, queryBalance, burn, mint, showNotification }
+export { 
+    contractAddress, 
+    initialize, 
+    isContractInitialized, 
+    name, 
+    symbol, 
+    decimals, 
+    currentItemCount, 
+    maxItemCount, 
+    balance, 
+    queryCurrentItemCount, 
+    queryMaxItemCount, 
+    queryBalance, 
+    burn, 
+    mint, 
+    showNotification 
+};
+
+import { inject } from 'vue'
 
 const { AVALANCHE_TESTNET_PARAMS, showNotification } = require("./globals.js");
 
@@ -12,18 +30,22 @@ const { signer } = require("./wallet.js");
 // eslint-disable-next-line no-unused-vars
 const provider = new ethers.providers.JsonRpcProvider(AVALANCHE_TESTNET_PARAMS.rpcUrls[0]);
 
+let emitter;
+
 let contract;
 
 let isContractInitialized;
 let name;
 let symbol;
 let decimals;
-let totalSupply;
+let currentItemCount;
+let maxItemCount;
 let balance;
 
 const defaultDecimals = 0; // 18 for Fungibles
 
 async function initialize() {
+    emitter = inject("emitter");
     if(signer()) {
         contract = new ethers.Contract(contractAddress, contractAbi, signer());
         isContractInitialized = true;
@@ -35,7 +57,8 @@ async function initialize() {
         console.log("Contract is initialized");
         await queryName();
         await querySymbol();
-        await queryTotalSupply();
+        await queryCurrentItemCount();
+        await queryMaxItemCount();
         await queryBalance();
         hookMintEvents();
     } else {
@@ -59,10 +82,14 @@ async function queryDecimals() {
     console.log("Contract decimal count is " + decimals);
 }
 
-async function queryTotalSupply() {
-    totalSupply = await contract.totalSupply()
-    totalSupply = ethers.utils.formatUnits(totalSupply, decimals ?? defaultDecimals)
-    console.log("Contract total supply is " + totalSupply);
+async function queryCurrentItemCount() {
+    currentItemCount = await contract.currentItemCount();
+    console.log("Contract current NFT count is " + currentItemCount);
+}
+
+async function queryMaxItemCount() {
+    maxItemCount = await contract.maxItemCount();
+    console.log("Contract maximum NFT count is " + maxItemCount);
 }
 
 async function queryBalance() {
@@ -81,7 +108,7 @@ async function burn() {
     const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
 
-    const itemId = (totalSupply ?? 1) - 1;
+    const itemId = (currentItemCount ?? 1) - 1;
 
     contract.destroyItem(itemId).then(() => {
         console.log("[BURN]: Transaction submitted");
@@ -98,7 +125,7 @@ async function mint() {
     const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
 
-    const itemPrice = ethers.utils.parseEther("1.0");
+    const itemPrice = await contract.itemFee();
 
     const overrides = {
         value: itemPrice
@@ -120,6 +147,16 @@ async function hookMintEvents() {
     contract.on(filterTo, (from, to, amount) => {
         // The `to` will always be the signer address
         console.log("[MINT]: Transaction completed, " + from + " => " + to + ", amount " + ethers.utils.formatUnits(amount, decimals ?? defaultDecimals));
-        showNotification("Success", "You've just mint an NFT!"); 
+        showNotification("Success", "You've just mint an NFT!");
+        setTimeout(() => {
+            refreshStats();
+        }, 1024);
     });
+}
+
+async function refreshStats() {
+    await queryCurrentItemCount();
+    await queryMaxItemCount();
+    await queryBalance();
+    await emitter.emit("onUpdateContractStats");
 }

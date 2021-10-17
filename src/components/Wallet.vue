@@ -1,25 +1,27 @@
 <template>
   <div class="wallet">
-    <span class="plugin-title">Wallet Plugin</span>
+    <label class="plugin-title">Wallet Plugin</label>
     <div class="connect-button">
       <div v-if="isConnected">
-        <button v-on:click="copy">{{ walletAddress }}</button>
+        <button class="rounded-button" v-on:click="copy">{{ walletAddress }}</button>
       </div>
       <div v-else>
-        <button v-on:click="connect">Connect</button>
+        <button class="rounded-button" v-on:click="connect">Connect</button>
       </div>
     </div>
     <!-- <div v-if="block">
-      <label>Block number is {{ block }}</label>
+      <label class="plugin-label">Block number is {{ block }}</label>
     </div> -->
     <div v-if="isConnected">
-      <label>Balance is {{ balance }} AVAX</label>
-      <button v-on:click="faucet">Faucet</button>
+      <label class="plugin-label">Balance is {{ balance }} AVAX</label>
+      <button class="rounded-button" v-on:click="queryBalance">QUERY BALANCE</button>
+      <button class="rounded-button" v-on:click="faucet">FAUCET</button>
     </div>
   </div>
 </template>
 
 <script>
+import { inject } from 'vue'
 import * as wallet from '../utils/wallet.js'
 import { copy } from '../utils/globals.js'
 export default {
@@ -44,6 +46,10 @@ export default {
       copy: async function() {
         await copy(this.walletAddress);
       },
+      queryBalance: async function() {
+        await wallet.queryBalance();
+        this.reload();
+      },
       faucet: function() {
         wallet.faucet();
       },
@@ -51,49 +57,15 @@ export default {
         this.block = await wallet.block();
         this.isConnected = await wallet.isConnected();
         this.walletAddress = await wallet.walletAddress(false);
-        this.balance = await wallet.balance();
+        this.balance = wallet.balance;
       }
   },
   async created() {
+    const emitter = inject("emitter");
     await this.initialize();
+    emitter.on("onUpdateContractStats", () => {
+      this.queryBalance();
+    });
   }
 }
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-button {
-  display: inline-block;
-  height: 64px;
-  line-height: 64px;
-  padding: 0 32px 0 32px;
-  margin-inline: 8px;
-  border: 0px solid transparent;
-  border-radius: 32px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 1.25em;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: #fff;
-  -webkit-transition: .7s cubic-bezier(.17,.85,.438,.99);
-  -o-transition: .7s cubic-bezier(.17,.85,.438,.99);
-  transition: .7s cubic-bezier(.17,.85,.438,.99);
-  background: var(--main-color);
-}
-
-button:hover {
-  opacity: 0.5;
-  cursor: pointer;
-}
-
-label {
-  font-family: 'Montserrat', sans-serif;
-  display: block;
-  color: white;
-  margin: 32px auto;
-  font-size: 1.25em;
-  font-weight: 600;
-}
-
-</style>
