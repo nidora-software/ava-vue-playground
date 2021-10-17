@@ -1,5 +1,5 @@
 
-export { contractAddress, initialize, name, symbol, decimals, totalSupply, balance, queryBalance, burn, mint }
+export { contractAddress, initialize, name, symbol, decimals, totalSupply, balance, queryBalance, queryTotalSupply, burn, mint }
 
 const { AVALANCHE_TESTNET_PARAMS } = require("./globals.js");
 
@@ -21,14 +21,14 @@ const contract = new ethers.Contract(contractAddress, contractAbi, signer());
 
 async function initialize() {
     if(contract) {
-        console.log("Contract is intialized");
+        console.log("Contract is initialized");
         await queryName();
         await querySymbol();
         await queryDecimals();
         await queryTotalSupply();
         await queryBalance();
     } else {
-        console.log("Contract could not be intialized");
+        console.log("Contract could not be initialized");
     }
 }
 
@@ -68,10 +68,39 @@ async function getBalance(address) {
 
 async function burn() {
 
-    let address = await signer().getAddress();
+    const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
 
-    let amount = ethers.utils.parseUnits("1.0", decimals ?? 18);
+    const overrides = await contractInteractionOverrides();
+
+    const amount = ethers.utils.parseUnits("1.0", decimals ?? 18);
+
+    contract.burn(address, amount, overrides).then(value => {
+        console.log("Transaction completed with value " + value);
+    }, reason => {
+        console.log("Transaction rejected with reason " + reason);
+    });
+
+}
+
+async function mint() {
+
+    const address = await signer().getAddress();
+    console.log("ADDRESS => " + address);
+
+    const overrides = await contractInteractionOverrides();
+
+    const amount = ethers.utils.parseUnits("1.0", decimals ?? 18);
+
+    contract.mint(address, amount, overrides).then(value => {
+        console.log("Transaction completed with value " + value);
+    }, reason => {
+        console.log("Transaction rejected with reason " + reason);
+    });
+
+}
+
+async function contractInteractionOverrides() {
 
     var gasEstimate;
 
@@ -84,22 +113,12 @@ async function burn() {
 
     console.log("GAS ESTIMATE => " + gasEstimate);
 
-    let gasPrice = await provider.getGasPrice();
+    const gasPrice = await provider.getGasPrice();
     console.log("GAS PRICE => " + gasPrice);
 
-    var overrides = {
+    return {
         gasLimit: gasEstimate,
         gasPrice: gasPrice
     };
 
-    contract.burn(address, amount, overrides).then(value => {
-        console.log("Transaction completed with value " + value);
-    }, reason => {
-        console.log("Transaction rejected with reason " + reason);
-    });
-
-}
-
-async function mint() {
-    console.log("Mint is coming soon!");
 }

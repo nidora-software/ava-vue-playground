@@ -2,8 +2,8 @@
   <div class="contract">
     <h1>Contract Plugin</h1>
     <div v-if="contractAddress">
+      <label>{{ contractName }} ({{ contractSymbol }})</label>
       <button>{{ contractAddress }}</button>
-      <label>Contract name is {{ contractName }}</label>
       <label>Decimal count is {{ contractDecimals }}</label>
       <label>Total supply is {{ contractTotalSupply }} {{ contractSymbol }}</label>
       <button v-on:click="queryBalance">Query Balance</button>
@@ -37,13 +37,16 @@ export default {
       },
       queryBalance: async function() {
         await contract.queryBalance();
+        await contract.queryTotalSupply();
         this.reload();
       },
-      burn: function() {
-        contract.burn();
+      burn: async function() {
+        await contract.burn();
+        this.reload();
       },
       mint: async function() {
-        contract.mint();
+        await contract.mint();
+        this.reload();
       },
       reload: async function() {
         this.contractAddress = await contract.contractAddress;

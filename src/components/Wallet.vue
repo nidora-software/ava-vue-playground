@@ -9,9 +9,9 @@
         <button v-on:click="connect">Connect</button>
       </div>
     </div>
-    <div v-if="block">
+    <!-- <div v-if="block">
       <label>Block number is {{ block }}</label>
-    </div>
+    </div> -->
     <div v-if="isConnected">
       <label>Balance is {{ balance }} AVAX</label>
       <button v-on:click="faucet">Faucet</button>
