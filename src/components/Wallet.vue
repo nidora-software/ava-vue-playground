@@ -1,9 +1,9 @@
 <template>
   <div class="wallet">
-    <h1>Wallet Plugin</h1>
+    <span class="plugin-title">Wallet Plugin</span>
     <div class="connect-button">
       <div v-if="isConnected">
-        <button v-on:click="disconnect">{{ walletAddress }}</button>
+        <button v-on:click="copy">{{ walletAddress }}</button>
       </div>
       <div v-else>
         <button v-on:click="connect">Connect</button>
@@ -21,6 +21,7 @@
 
 <script>
 import * as wallet from '../utils/wallet.js'
+import { copy } from '../utils/globals.js'
 export default {
   name: 'Wallet',
   data() {
@@ -40,9 +41,8 @@ export default {
         await wallet.connect();
         this.reload();
       },
-      disconnect: async function() {
-        await wallet.disconnect();
-        this.reload();
+      copy: async function() {
+        await copy(this.walletAddress);
       },
       faucet: function() {
         wallet.faucet();

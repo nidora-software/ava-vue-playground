@@ -1,7 +1,7 @@
 
-export { contractAddress, initialize, isContractInitialized, name, symbol, decimals, totalSupply, balance, queryTotalSupply, queryBalance, burn, mint }
+export { contractAddress, initialize, isContractInitialized, name, symbol, decimals, totalSupply, balance, queryTotalSupply, queryBalance, burn, mint, showNotification }
 
-const { AVALANCHE_TESTNET_PARAMS } = require("./globals.js");
+const { AVALANCHE_TESTNET_PARAMS, showNotification } = require("./globals.js");
 
 const { contractAddress, contractAbi } = require("./contractMeta.js");
 
@@ -85,8 +85,10 @@ async function burn() {
 
     contract.destroyItem(itemId).then(() => {
         console.log("[BURN]: Transaction submitted");
+        showNotification("Processing", "Transaction submitted."); 
     }, () => {
         console.log("[BURN]: Transaction rejected");
+        showNotification("Failure", "Your transaction is rejected.");
     });
 
 }
@@ -96,10 +98,18 @@ async function mint() {
     const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
 
-    contract.createItem(address).then(() => {
+    const itemPrice = ethers.utils.parseEther("1.0");
+
+    const overrides = {
+        value: itemPrice
+    };
+
+    contract.createItem(address, overrides).then(() => {
         console.log("[MINT]: Transaction submitted");
+        showNotification("Processing", "Transaction submitted."); 
     }, () => {
         console.log("[MINT]: Transaction rejected");
+        showNotification("Failure", "Your transaction is rejected.");
     });
 
 }
@@ -110,5 +120,6 @@ async function hookMintEvents() {
     contract.on(filterTo, (from, to, amount) => {
         // The `to` will always be the signer address
         console.log("[MINT]: Transaction completed, " + from + " => " + to + ", amount " + ethers.utils.formatUnits(amount, decimals ?? defaultDecimals));
+        showNotification("Success", "You've just mint an NFT"); 
     });
 }

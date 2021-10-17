@@ -1,8 +1,8 @@
 <template>
   <div class="contract" v-if="isContractInitialized">
-    <h1>Contract Plugin</h1>
+    <span class="plugin-title">Contract Plugin</span>
     <label>{{ contractName }} ({{ contractSymbol }})</label>
-    <button>{{ contractAddress }}</button>
+    <button v-on:click="copy">{{ contractAddress }}</button>
     <br><br>
     <label v-if="contractDecimals">Decimal count is {{ contractDecimals }}</label>
     <label v-if="contractTotalSupply">Total supply is {{ contractTotalSupply }} {{ contractSymbol }}</label>
@@ -17,6 +17,7 @@
 
 <script>
 import * as contract from '../utils/contract.js'
+import { copy } from '../utils/globals.js'
 export default {
   name: 'Contract',
   data() {
@@ -47,6 +48,9 @@ export default {
       mint: async function() {
         await contract.mint();
         this.reload();
+      },
+      copy: function() {
+        copy(this.contractAddress);
       },
       reload: async function() {
         this.isContractInitialized = await contract.isContractInitialized;

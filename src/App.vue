@@ -1,17 +1,21 @@
 <template>
-  <div>
-    <img alt="Avalanche logo" height="180" src="./assets/ava-logo.png" />
-    <img alt="Vue logo" height="180" src="./assets/vue-logo.png" style="margin-left: 32px;" />
+  <div class="container mx-auto px-16">
+    <div class="w-full flex justify-center">
+      <div class="grid grid-cols-2 gap-8 mt-8">
+        <img class="h-48" alt="Avalanche logo" src="./assets/ava-logo.png" />
+        <img class="h-48" alt="Vue logo" src="./assets/vue-logo.png" />
+      </div>
+    </div>
+    <Hello />
+    <Wallet />
+    <br>
+    <Contract />
   </div>
-  <br>
-  <Hello msg="Welcome to Avalanche Vue Playground" />
-  <br>
-  <Wallet />
-  <br>
-  <Contract />
+  <Notifications />
 </template>
 
 <script>
+import Notifications from "./components/Notifications.vue"
 import Hello from "./components/Hello.vue";
 import Wallet from "./components/Wallet.vue";
 import Contract from "./components/Contract.vue";
@@ -19,6 +23,7 @@ import Contract from "./components/Contract.vue";
 export default {
   name: "App",
   components: {
+    Notifications,
     Hello,
     Wallet,
     Contract
@@ -66,7 +71,11 @@ body {
   margin-top: 64px;
 }
 
-h1 {
+.plugin-title {
+  display: block;
+  font-size: 36px;
+  font-weight: 800;
+  margin-top: 16px;
   margin-bottom: 32px;
 }
 

@@ -1,4 +1,6 @@
-export { AVALANCHE_MAINNET_PARAMS, AVALANCHE_TESTNET_PARAMS };
+export { AVALANCHE_MAINNET_PARAMS, AVALANCHE_TESTNET_PARAMS, showNotification, copy };
+
+import { notify } from "notiwind"
 
 const AVALANCHE_MAINNET_PARAMS = {
     chainId: "0x"+(43114).toString(16),
@@ -23,3 +25,22 @@ const AVALANCHE_TESTNET_PARAMS = {
     rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
     blockExplorerUrls: ['https://cchain.explorer.avax-test.network/']
 };
+
+async function copy(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        // alert('Copied');
+        showNotification("Success", "Copied!");
+    } catch(error) {
+        // alert('Cannot copy ' + error);
+        // showNotification("Cannot copy");
+    }
+}
+
+function showNotification(title, message, dismissAfter = 20000) {
+    notify({
+        group: "top",
+        title: title,
+        text: message
+      }, dismissAfter);
+}
