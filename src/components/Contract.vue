@@ -1,17 +1,16 @@
 <template>
-  <div class="contract">
+  <div class="contract" v-if="isContractInitialized">
     <h1>Contract Plugin</h1>
-    <div v-if="contractAddress">
-      <label>{{ contractName }} ({{ contractSymbol }})</label>
-      <button>{{ contractAddress }}</button>
-      <label>Decimal count is {{ contractDecimals }}</label>
-      <label>Total supply is {{ contractTotalSupply }} {{ contractSymbol }}</label>
-      <button v-on:click="queryBalance">Query Balance</button>
-      <button v-on:click="burn">Burn</button>
-      <button v-on:click="mint">Mint</button>
-      <div v-if="contractBalance">
-        <label>Balance is {{ contractBalance }} {{ contractSymbol }}</label>
-      </div>
+    <label>{{ contractName }} ({{ contractSymbol }})</label>
+    <button>{{ contractAddress }}</button>
+    <br><br>
+    <label v-if="contractDecimals">Decimal count is {{ contractDecimals }}</label>
+    <label v-if="contractTotalSupply">Total supply is {{ contractTotalSupply }} {{ contractSymbol }}</label>
+    <button v-on:click="queryBalance">Query Balance</button>
+    <button v-on:click="burn">Burn</button>
+    <button v-on:click="mint">Mint</button>
+    <div v-if="contractBalance">
+      <label>Balance is {{ contractBalance }} {{ contractSymbol }}</label>
     </div>
   </div>
 </template>
@@ -22,6 +21,7 @@ export default {
   name: 'Contract',
   data() {
     return {
+      isContractInitialized: undefined,
       contractAddress: undefined,
       contractName: undefined,
       contractSymbol: undefined,
@@ -36,8 +36,8 @@ export default {
         this.reload();
       },
       queryBalance: async function() {
-        await contract.queryBalance();
         await contract.queryTotalSupply();
+        await contract.queryBalance();
         this.reload();
       },
       burn: async function() {
@@ -49,6 +49,7 @@ export default {
         this.reload();
       },
       reload: async function() {
+        this.isContractInitialized = await contract.isContractInitialized;
         this.contractAddress = await contract.contractAddress;
         this.contractName = await contract.name;
         this.contractSymbol = await contract.symbol;

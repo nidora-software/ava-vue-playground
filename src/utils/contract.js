@@ -1,5 +1,5 @@
 
-export { contractAddress, initialize, name, symbol, decimals, totalSupply, balance, queryBalance, queryTotalSupply, burn, mint }
+export { contractAddress, initialize, isContractInitialized, name, symbol, decimals, totalSupply, balance, queryTotalSupply, queryBalance, burn, mint }
 
 const { AVALANCHE_TESTNET_PARAMS } = require("./globals.js");
 
@@ -9,22 +9,32 @@ const { ethers } = require("ethers");
 
 const { signer } = require("./wallet.js");
 
+// eslint-disable-next-line no-unused-vars
 const provider = new ethers.providers.JsonRpcProvider(AVALANCHE_TESTNET_PARAMS.rpcUrls[0]);
 
-const contract = new ethers.Contract(contractAddress, contractAbi, signer());
+let contract;
 
+let isContractInitialized;
 let name;
 let symbol;
 let decimals;
 let totalSupply;
 let balance;
 
+const defaultDecimals = 0; // 18 for Fungibles
+
 async function initialize() {
-    if(contract) {
+    if(signer()) {
+        contract = new ethers.Contract(contractAddress, contractAbi, signer());
+        isContractInitialized = true;
+    } else {
+        isContractInitialized = false;
+        return;
+    }
+    if(isContractInitialized) {
         console.log("Contract is initialized");
         await queryName();
         await querySymbol();
-        await queryDecimals();
         await queryTotalSupply();
         await queryBalance();
         hookMintEvents();
@@ -43,6 +53,7 @@ async function querySymbol() {
     console.log("Contract symbol is " + symbol);
 }
 
+// eslint-disable-next-line no-unused-vars
 async function queryDecimals() {
     decimals = await contract.decimals();
     console.log("Contract decimal count is " + decimals);
@@ -50,7 +61,7 @@ async function queryDecimals() {
 
 async function queryTotalSupply() {
     totalSupply = await contract.totalSupply()
-    totalSupply = ethers.utils.formatUnits(totalSupply, decimals ?? 18)
+    totalSupply = ethers.utils.formatUnits(totalSupply, decimals ?? defaultDecimals)
     console.log("Contract total supply is " + totalSupply);
 }
 
@@ -62,7 +73,7 @@ async function queryBalance() {
 
 async function getBalance(address) {
     const balance = await contract.balanceOf(address);
-    return ethers.utils.formatUnits(balance, 18);
+    return ethers.utils.formatUnits(balance, decimals ?? defaultDecimals);
 }
 
 async function burn() {
@@ -70,11 +81,9 @@ async function burn() {
     const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
 
-    const overrides = await contractInteractionOverrides();
+    const itemId = (totalSupply ?? 1) - 1;
 
-    const amount = ethers.utils.parseUnits("1.0", decimals ?? 18);
-
-    contract.burn(address, amount, overrides).then(() => {
+    contract.destroyItem(itemId).then(() => {
         console.log("[BURN]: Transaction submitted");
     }, () => {
         console.log("[BURN]: Transaction rejected");
@@ -87,38 +96,11 @@ async function mint() {
     const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
 
-    const overrides = await contractInteractionOverrides();
-
-    const amount = ethers.utils.parseUnits("1.0", decimals ?? 18);
-
-    contract.mint(address, amount, overrides).then(() => {
+    contract.createItem(address).then(() => {
         console.log("[MINT]: Transaction submitted");
     }, () => {
         console.log("[MINT]: Transaction rejected");
     });
-
-}
-
-async function contractInteractionOverrides() {
-
-    var gasEstimate;
-
-    try {
-        gasEstimate = await signer().estimateGas();
-    } catch(error) {
-        console.log("Error: " + error);
-        gasEstimate = 3500000;
-    }
-
-    console.log("GAS ESTIMATE => " + gasEstimate);
-
-    const gasPrice = await provider.getGasPrice();
-    console.log("GAS PRICE => " + gasPrice);
-
-    return {
-        gasLimit: gasEstimate,
-        gasPrice: gasPrice
-    };
 
 }
 
@@ -127,6 +109,6 @@ async function hookMintEvents() {
     const filterTo = contract.filters.Transfer(null, address);
     contract.on(filterTo, (from, to, amount) => {
         // The `to` will always be the signer address
-        console.log("[MINT]: Transaction completed, " + from + " => " + to + ", amount " + ethers.utils.formatUnits(amount, decimals ?? 18));
+        console.log("[MINT]: Transaction completed, " + from + " => " + to + ", amount " + ethers.utils.formatUnits(amount, decimals ?? defaultDecimals));
     });
 }

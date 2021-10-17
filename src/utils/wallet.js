@@ -6,7 +6,7 @@ const { ethers } = require("ethers");
 
 const { AVALANCHE_TESTNET_PARAMS } = require("./globals.js");
 
-const provider = new ethers.providers.Web3Provider(ethereum);
+let provider;
 
 let blockNumber;
 let selectedAccount;
@@ -14,6 +14,8 @@ let selectedAccount;
 async function initialize() {
 
     if (isMetaMaskInstalled()) {
+
+        provider = new ethers.providers.Web3Provider(ethereum);
 
         ethereum.on('accountsChanged', function (accounts) {
             // Time to reload your interface with accounts[0]!
@@ -33,7 +35,8 @@ async function initialize() {
         await connect();
 
     } else {
-        alert("MetaMask is not installed.");
+        //alert("MetaMask is not installed.");
+        console.log("MetaMask is not installed.");
     }
 
 }
@@ -75,6 +78,11 @@ async function balance() {
 }
 
 async function connect() {
+
+    if(!ethereum) {
+        alert("MetaMask is not installed.");
+        return;
+    }
 
     await addNetworkToMetamask();
 
@@ -124,5 +132,7 @@ const isMetaMaskInstalled = () => {
 };
 
 const signer = () => {
-    return provider.getSigner();
+    if(provider) {
+        return provider.getSigner();
+    }
 }
