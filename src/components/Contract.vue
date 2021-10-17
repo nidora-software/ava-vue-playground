@@ -1,57 +1,47 @@
 <template>
-  <div class="wallet">
-    <h1>Wallet Plugin</h1>
-    <div class="connect-button">
-      <div v-if="isConnected">
-        <button v-on:click="disconnect">{{ walletAddress }}</button>
+  <div class="contract">
+    <h1>Contract Plugin</h1>
+    <div v-if="contractAddress">
+      <label> {{ contractAddress }} </label>
+      <label> {{ contractName }} </label>
+      <button v-on:click="queryBalance">Query Balance</button>
+      <button v-on:click="mint">Mint</button>
+      <div v-if="contractBalance">
+        <label>Balance is {{ contractBalance }} {{ contractSymbol }}</label>
       </div>
-      <div v-else>
-        <button v-on:click="connect">Connect</button>
-      </div>
-    </div>
-    <div v-if="block">
-      <label>Block number is {{ block }}</label>
-    </div>
-    <div v-if="isConnected">
-      <label>Balance is {{ balance }} AVAX</label>
-      <button v-on:click="faucet">Faucet</button>
     </div>
   </div>
 </template>
 
 <script>
-import * as wallet from '../utils/wallet.js'
+import * as contract from '../utils/contract.js'
 export default {
-  name: 'Wallet',
+  name: 'Contract',
   data() {
     return {
-      block: undefined,
-      isConnected: undefined,
-      walletAddress: undefined,
-      balance: undefined
+      contractAddress: undefined,
+      contractName: undefined,
+      contractSymbol: undefined,
+      contractBalance: undefined
     };
   },
   methods: {
       initialize: async function() {
-        await wallet.initialize();
+        await contract.initialize();
         this.reload();
       },
-      connect: async function() {
-        await wallet.connect();
+      queryBalance: async function() {
+        await contract.displayBalance();
         this.reload();
       },
-      disconnect: async function() {
-        await wallet.disconnect();
-        this.reload();
-      },
-      faucet: function() {
-        wallet.faucet();
+      mint: async function() {
+        console.log("Mint success");
       },
       reload: async function() {
-        this.block = await wallet.block();
-        this.isConnected = await wallet.isConnected();
-        this.walletAddress = await wallet.walletAddress();
-        this.balance = await wallet.balance();
+        this.contractAddress = await contract.contractAddress;
+        this.contractName = await contract.name();
+        this.contractSymbol = await contract.symbol();
+        this.contractBalance = await contract.balance();
       }
   },
   async created() {

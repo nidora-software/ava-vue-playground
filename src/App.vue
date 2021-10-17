@@ -2,17 +2,20 @@
   <img alt="Vue logo" src="./assets/logo.png" />
   <HelloWorld msg="Welcome to Avalanche Vue Playground" />
   <Wallet />
+  <Contract />
 </template>
 
 <script>
-import Wallet from "./components/Wallet.vue";
 import HelloWorld from "./components/HelloWorld.vue";
+import Wallet from "./components/Wallet.vue";
+import Contract from "./components/Contract.vue";
 
 export default {
   name: "App",
   components: {
-    Wallet,
     HelloWorld,
+    Wallet,
+    Contract
   }
 };
 </script>

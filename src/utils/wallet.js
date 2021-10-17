@@ -4,30 +4,16 @@ const { ethereum } = window;
 
 const { ethers } = require("ethers");
 
-const AVALANCHE_TESTNET_PARAMS = {
-    chainId: "0x"+(43113).toString(16),
-    chainName: 'Avalanche Testnet C-Chain',
-    nativeCurrency: {
-        name: 'Avalanche',
-        symbol: 'AVAX',
-        decimals: 18
-    },
-    rpcUrls: ['https://api.avax-test.network/ext/bc/C/rpc'],
-    blockExplorerUrls: ['https://cchain.explorer.avax-test.network/']
-}
+const { AVALANCHE_TESTNET_PARAMS } = require("./globals.js");
 
 const provider = new ethers.providers.Web3Provider(ethereum);
-
-// const signer = provider.getSigner()
-
-// const provider = new ethers.providers.JsonRpcProvider(AVALANCHE_TESTNET_PARAMS.rpcUrls[0]);
 
 let blockNumber;
 let selectedAccount;
 
 async function initialize() {
 
-    if (typeof ethereum !== 'undefined') {
+    if (isMetaMaskInstalled()) {
 
         ethereum.on('accountsChanged', function (accounts) {
             // Time to reload your interface with accounts[0]!
@@ -93,7 +79,6 @@ async function connect() {
     await addNetworkToMetamask();
 
     blockNumber = await provider.getBlockNumber()
-    // 13098598
     console.log("Block number is " + blockNumber);
 
     const accounts = await ethereum.request({
@@ -114,13 +99,9 @@ async function disconnect() {
 }
 
 function displayAccount(account) {
-
     let accountAddress = walletAddress(false);
-
     console.log("Current account is " + accountAddress);
-
     displayBalance(account);
-
 }
 
 async function displayBalance(account) {
@@ -136,3 +117,8 @@ async function faucet() {
 function loadPage() {
     window.location.reload();
 }
+
+const isMetaMaskInstalled = () => {
+    //Have to check the ethereum binding on the window object to see if it's installed
+    return Boolean(ethereum && ethereum.isMetaMask);
+};
