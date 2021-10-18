@@ -1,8 +1,7 @@
 
 export { 
     contractAddress, 
-    initialize, 
-    isContractInitialized, 
+    initialize,  
     name, 
     symbol, 
     decimals, 
@@ -27,14 +26,12 @@ const { ethers } = require("ethers");
 
 const { signer } = require("./wallet.js");
 
-// eslint-disable-next-line no-unused-vars
 const provider = new ethers.providers.JsonRpcProvider(AVALANCHE_TESTNET_PARAMS.rpcUrls[0]);
 
 let emitter;
 
 let contract;
 
-let isContractInitialized;
 let name;
 let symbol;
 let decimals;
@@ -48,12 +45,10 @@ async function initialize() {
     emitter = inject("emitter");
     if(signer()) {
         contract = new ethers.Contract(contractAddress, contractAbi, signer());
-        isContractInitialized = true;
     } else {
-        isContractInitialized = false;
-        return;
+        contract = new ethers.Contract(contractAddress, contractAbi, provider);
     }
-    if(isContractInitialized) {
+    if(contract) {
         console.log("Contract is initialized");
         await queryName();
         await querySymbol();
@@ -93,9 +88,15 @@ async function queryMaxItemCount() {
 }
 
 async function queryBalance() {
+
+    if(!signer()) {
+        return;
+    }
+
     const address = await signer().getAddress();
     balance = await getBalance(address);
     console.log("Current balance is " + balance);
+
 }
 
 async function getBalance(address) {
@@ -104,6 +105,10 @@ async function getBalance(address) {
 }
 
 async function burn() {
+
+    if(!signer()) {
+        return;
+    }
 
     const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
@@ -121,6 +126,10 @@ async function burn() {
 }
 
 async function mint() {
+
+    if(!signer()) {
+        return;
+    }
 
     const address = await signer().getAddress();
     console.log("ADDRESS => " + address);
@@ -142,8 +151,15 @@ async function mint() {
 }
 
 async function hookMintEvents() {
+
+    if(!signer()) {
+        return;
+    }
+
     const address = await signer().getAddress();
+
     const filterTo = contract.filters.Transfer(null, address);
+
     contract.on(filterTo, (from, to, amount) => {
         // The `to` will always be the signer address
         console.log("[MINT]: Transaction completed, " + from + " => " + to + ", amount " + ethers.utils.formatUnits(amount, decimals ?? defaultDecimals));
@@ -152,6 +168,7 @@ async function hookMintEvents() {
             refreshStats();
         }, 1024);
     });
+
 }
 
 async function refreshStats() {

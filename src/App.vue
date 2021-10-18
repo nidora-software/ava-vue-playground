@@ -2,8 +2,8 @@
   <div class="container mx-auto px-16">
     <div class="w-full flex justify-center">
       <div class="grid grid-cols-2 gap-8 mt-8">
-        <img class="h-48" alt="Avalanche logo" src="./assets/ava-logo.png" />
-        <img class="h-48" alt="Vue logo" src="./assets/vue-logo.png" />
+        <img class="h-48 w-48" alt="Avalanche logo" src="./assets/ava-logo.png" />
+        <img class="h-48 w-48" alt="Vue logo" src="./assets/vue-logo.png" />
       </div>
     </div>
     <Hello />
@@ -56,6 +56,7 @@ body {
 }
 
 .wallet {
+  width: 600px;
   display: inline-block;
   padding-top: 16px;
   padding-bottom: 32px;
@@ -66,6 +67,7 @@ body {
 }
 
 .contract {
+  width: 600px;
   display: inline-block;
   padding-top: 16px;
   padding-bottom: 16px;

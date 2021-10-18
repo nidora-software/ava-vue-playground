@@ -6,7 +6,7 @@
         <button class="rounded-button" v-on:click="copy">{{ walletAddress }}</button>
       </div>
       <div v-else>
-        <button class="rounded-button" v-on:click="connect">Connect</button>
+        <button class="rounded-button" v-on:click="connect">CONNECT</button>
       </div>
     </div>
     <!-- <div v-if="block">
@@ -23,7 +23,7 @@
 <script>
 import { inject } from 'vue'
 import * as wallet from '../utils/wallet.js'
-import { copy } from '../utils/globals.js'
+import { AVALANCHE_TESTNET_PARAMS, copy } from '../utils/globals.js'
 export default {
   name: 'Wallet',
   data() {
@@ -43,8 +43,11 @@ export default {
         await wallet.connect();
         this.reload();
       },
-      copy: async function() {
-        await copy(this.walletAddress);
+      copy: function() {
+        copy(this.walletAddress, () => {
+          const url = AVALANCHE_TESTNET_PARAMS.blockExplorerUrls[0] + 'address/' + this.walletAddress;
+          window.open(url, "_blank");
+        });
       },
       queryBalance: async function() {
         await wallet.queryBalance();

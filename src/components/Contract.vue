@@ -1,28 +1,28 @@
 <template>
-  <div class="contract" v-if="isContractInitialized">
+  <div class="contract" v-if="contractAddress">
     <label class="plugin-title">Contract Plugin</label>
     <label class="plugin-label" >{{ contractName }} ({{ contractSymbol }})</label>
     <button class="rounded-button" v-on:click="copy">{{ contractAddress }}</button>
     <label class="plugin-label" v-if="contractDecimals">Decimal count is {{ contractDecimals }}</label>
     <label class="plugin-label" v-if="contractCurrentItemCount && contractMaxItemCount">{{ contractCurrentItemCount }} / {{ contractMaxItemCount }} NFT's minted</label>
-    <button class="rounded-button" v-on:click="queryBalance">QUERY BALANCE</button>
-    <!-- <button class="rounded-button" v-on:click="burn">BURN</button> -->
-    <button class="rounded-button" v-on:click="mint">MINT</button>
     <div v-if="contractBalance">
+      <button class="rounded-button" v-on:click="queryBalance">QUERY BALANCE</button>
+      <!-- <button class="rounded-button" v-on:click="burn">BURN</button> -->
+      <button class="rounded-button" v-on:click="mint">MINT</button>
       <label class="plugin-label">Balance is {{ contractBalance }} {{ contractSymbol }}</label>
     </div>
+    
   </div>
 </template>
 
 <script>
 import { inject } from 'vue'
 import * as contract from '../utils/contract.js'
-import { copy } from '../utils/globals.js'
+import { AVALANCHE_TESTNET_PARAMS, copy } from '../utils/globals.js'
 export default {
   name: 'Contract',
   data() {
     return {
-      isContractInitialized: undefined,
       contractAddress: undefined,
       contractName: undefined,
       contractSymbol: undefined,
@@ -50,10 +50,12 @@ export default {
         this.reload();
       },
       copy: function() {
-        copy(this.contractAddress);
+        copy(this.contractAddress, () => {
+          const url = AVALANCHE_TESTNET_PARAMS.blockExplorerUrls[0] + 'address/' + this.contractAddress;
+          window.open(url, "_blank");
+        });
       },
       reload: async function() {
-        this.isContractInitialized = await contract.isContractInitialized;
         this.contractAddress = await contract.contractAddress;
         this.contractName = await contract.name;
         this.contractSymbol = await contract.symbol;
