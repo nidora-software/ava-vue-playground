@@ -9,6 +9,7 @@
       <button class="rounded-button" v-on:click="queryBalance">QUERY BALANCE</button>
       <!-- <button class="rounded-button" v-on:click="burn">BURN</button> -->
       <button class="rounded-button" v-on:click="mint">MINT</button>
+      <button class="rounded-button" v-if="isOwner" v-on:click="withdraw">WITHDRAW</button>
       <label class="plugin-label">Balance is {{ contractBalance }} {{ contractSymbol }}</label>
     </div>
     
@@ -23,6 +24,7 @@ export default {
   name: 'Contract',
   data() {
     return {
+      isOwner: false,
       contractAddress: undefined,
       contractName: undefined,
       contractSymbol: undefined,
@@ -49,20 +51,25 @@ export default {
         await contract.mint();
         this.reload();
       },
+      withdraw: async function() {
+        await contract.withdraw();
+        this.reload();
+      },
       copy: function() {
         copy(this.contractAddress, () => {
           const url = AVALANCHE_TESTNET_PARAMS.blockExplorerUrls[0] + 'address/' + this.contractAddress;
           window.open(url, "_blank");
         });
       },
-      reload: async function() {
-        this.contractAddress = await contract.contractAddress;
-        this.contractName = await contract.name;
-        this.contractSymbol = await contract.symbol;
-        this.contractDecimals = await contract.decimals;
-        this.contractCurrentItemCount = await contract.currentItemCount;
-        this.contractMaxItemCount = await contract.maxItemCount;
-        this.contractBalance = await contract.balance;
+      reload: function() {
+        this.contractAddress = contract.contractAddress;
+        this.contractName = contract.name;
+        this.contractSymbol = contract.symbol;
+        this.contractDecimals = contract.decimals;
+        this.contractCurrentItemCount = contract.currentItemCount;
+        this.contractMaxItemCount = contract.maxItemCount;
+        this.contractBalance = contract.balance;
+        this.isOwner = contract.isOwner;
       }
   },
   async created() {

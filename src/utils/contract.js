@@ -1,7 +1,8 @@
 
 export { 
     contractAddress, 
-    initialize,  
+    initialize,
+    isOwner,
     name, 
     symbol, 
     decimals, 
@@ -12,7 +13,8 @@ export {
     queryMaxItemCount, 
     queryBalance, 
     burn, 
-    mint, 
+    mint,
+    withdraw,
     showNotification 
 };
 
@@ -32,6 +34,7 @@ let emitter;
 
 let contract;
 
+let isOwner;
 let name;
 let symbol;
 let decimals;
@@ -55,6 +58,7 @@ async function initialize() {
         await queryCurrentItemCount();
         await queryMaxItemCount();
         await queryBalance();
+        await checkOwnership();
         hookMintEvents();
     } else {
         console.log("Contract could not be initialized");
@@ -150,6 +154,34 @@ async function mint() {
 
 }
 
+async function withdraw() {
+
+    if(!isOwner) {
+        return;
+    }
+
+    if(!signer()) {
+        return;
+    }
+
+    const amount = await provider.getBalance(contractAddress);
+    console.log("Contract balance amount is " + amount);
+
+    if(amount <= 0) {
+        console.log("No amount to withdraw");
+        return;
+    }
+
+    contract.withdraw(amount).then(() => {
+        console.log("[WITHDRAW]: Transaction submitted");
+        showNotification("Processing", "Transaction submitted."); 
+    }, () => {
+        console.log("[WITHDRAW]: Transaction rejected");
+        showNotification("Failure", "Your transaction is rejected.");
+    });
+
+}
+
 async function hookMintEvents() {
 
     if(!signer()) {
@@ -168,6 +200,22 @@ async function hookMintEvents() {
             refreshStats();
         }, 1024);
     });
+
+}
+
+async function checkOwnership() {
+
+    if(!signer()) {
+        return;
+    }
+
+    const address = await signer().getAddress();
+    console.log("ADDRESS => " + address);
+
+    const owner = await contract.owner();
+    console.log("Contract owner is " + owner);
+
+    isOwner = address === owner;
 
 }
 

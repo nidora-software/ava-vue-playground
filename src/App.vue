@@ -39,7 +39,7 @@ export default {
 <style>
 
 body {
-  background: rgb(26, 3, 41);
+  background: rgb(20, 0, 40);
 }
 
 #app {
@@ -52,30 +52,30 @@ body {
 }
 
 :root {
-  --main-color: rgb(255, 0, 179);
+  --main-color: rgb(255, 0, 100);
 }
 
 .wallet {
-  width: 600px;
+  width: 680px;
   display: inline-block;
   padding-top: 16px;
   padding-bottom: 32px;
   padding-left: 32px;
   padding-right: 32px;
-  border: 2px white solid;
+  background: rgb(15, 15, 45);
   border-radius: 16px 16px;
 }
 
 .contract {
-  width: 600px;
+  width: 680px;
   display: inline-block;
   padding-top: 16px;
   padding-bottom: 16px;
   padding-left: 32px;
   padding-right: 32px;
-  border: 2px white solid;
+  background: rgb(15, 15, 45);
   border-radius: 16px 16px;
-  margin-top: 64px;
+  margin-top: 48px;
 }
 
 .plugin-title {
